@@ -28,7 +28,7 @@ function LunchCheckController ($scope){
 
 }
 
-function calculateFood(string) {              //Number of food items calculated
+function calculateFood(string) {              //Number of food items calculated.
   var totalFood = 1;
   for (var i = 0; i < string.length; i++) {
     if (string.charAt(i) == ',') {
