@@ -1,15 +1,18 @@
-(function functionName() {
+(function () {
 'use strict';
 
-angular.module('FoodChecker', [])
+angular.module('LunchCheck', [])
 
-.controller('FoodCheckerController', function ($scope){
+.controller('LunchCheckController', LunchCheckController);
 
-  $scope.food = '';
-  $scope.totalFood = 0;
-  $scope.result = '';
+LunchCheckController.$inject = ['$scope'];        //Injection of scope working with minification
 
-  $scope.displayResult = function () {
+function LunchCheckController ($scope){
+  $scope.food = '';                               //Text input of food items
+  $scope.totalFood = 0;                           //Number of food items
+  $scope.result = '';                             //Result to b shown
+
+  $scope.displayResult = function () {            //Function to check which of the 3 conditions are being satisfied to determine result
     var numFood = calculateFood($scope.food);
     $scope.totalFood = numFood;
     if ($scope.totalFood > 3) {
@@ -23,17 +26,16 @@ angular.module('FoodChecker', [])
     }
   };
 
-  function calculateFood(string) {                    
-    var totalFood = 1;
-    for (var i = 0; i < string.length; i++) {
-      if (string.charAt(i) == ',') {
-        totalFood += 1;
-      }
+}
+
+function calculateFood(string) {              //Number of food items calculated
+  var totalFood = 1;
+  for (var i = 0; i < string.length; i++) {
+    if (string.charAt(i) == ',') {
+      totalFood += 1;
     }
-    return totalFood;
-  };
-
-});
-
+  }
+  return totalFood;
+};
 
 })();
