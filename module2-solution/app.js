@@ -1,41 +1,89 @@
 (function () {
 'use strict';
 
-angular.module('LunchCheck', [])
+angular.module('ShoppingListCheckOff', [])
+.controller('AlreadyBoughtController', AlreadyBoughtController)
+.controller('ToBuyController', ToBuyController)
+.service('ShoppingListCheckOffService', ShoppingListCheckOffService);
 
-.controller('LunchCheckController', LunchCheckController);
+ToBuyController.$inject = ['ShoppingListCheckOffService'];
+function ToBuyController(ShoppingListCheckOffService) {
+  var showList = this;
 
-LunchCheckController.$inject = ['$scope'];        //Injection of scope working with minification
+  showList.items = ShoppingListCheckOffService.getItems();
 
-function LunchCheckController ($scope){
-  $scope.food = '';                               //Text input of food items
-  $scope.totalFood = 0;                           //Number of food items
-  $scope.result = '';                             //Result to b shown
-
-  $scope.displayResult = function () {            //Function to check which of the 3 conditions are being satisfied to determine result
-    var numFood = calculateFood($scope.food);
-    $scope.totalFood = numFood;
-    if ($scope.totalFood > 3) {
-      $scope.result = 'Too much!';
-    }
-    else if (1 <= $scope.totalFood <= 3) {
-      $scope.result = 'Enjoy!';
-    }
-    if ($scope.food == ""){
-      $scope.result = "Please enter data first";
-    }
+  showList.removeItem = function (itemIndex) {
+    ShoppingListCheckOffService.removeItem(itemIndex);
   };
 
 }
 
-function calculateFood(string) {              //Number of food items calculated.
-  var totalFood = 1;
-  for (var i = 0; i < string.length; i++) {
-    if (string.charAt(i) == ',') {
-      totalFood += 1;
-    }
+AlreadyBoughtController.$inject = ['ShoppingListCheckOffService'];
+function AlreadyBoughtController(ShoppingListCheckOffService) {
+  var itemAdder = this;
+
+  itemAdder.itemName = "";
+  itemAdder.itemQuantity = "";
+
+  itemAdder.addItem = function () {
+    ShoppingListCheckOffService.addItem(itemAdder.itemName, itemAdder.itemQuantity);
   }
-  return totalFood;
-};
+
+  itemAdder.boughtItems = ShoppingListCheckOffService.getBoughtItems();
+}
+
+function ShoppingListCheckOffService() {
+  var service = this;
+
+  // List of shopping items
+  var items = [ {
+       name: "Milk",
+       quantity: "2"
+     },
+     {
+       name: "Apples",
+       quantity: "10"
+     },
+     {
+       name: "Soda",
+       quantity: "3"
+     },
+     {
+       name: "Carrots",
+       quantity: "24"
+     },
+     {
+       name: "Oranges",
+       quantity: "8"
+     },
+     {
+       name: "Chips",
+       quantity: "5"
+     }
+  ]
+  var boughtItems = [];
+
+  service.addItem = function (itemName, quantity) {
+    var item = {
+      name: itemName,
+      quantity: quantity
+    };
+    items.push(item);
+  };
+
+  service.removeItem = function (itemIndex) {
+    var temp = items.splice(itemIndex, 1)
+    boughtItems.push(temp.pop());
+  };
+
+  service.getItems = function () {
+    return items;
+  };
+
+  service.getBoughtItems = function () {
+    return boughtItems;
+  };
+
+}
 
 })();
