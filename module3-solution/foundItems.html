@@ -1,0 +1,20 @@
+<table>
+	<thead>
+		<tr>
+			<th scope="col" class="text-center">Name</th>
+			<th scope="col" class="text-center">Short Name</th>
+			<th scope="col" class="text-center">Description</th>
+            <th scope="col" class="text-center">Remove</th>
+		</tr>
+	</thead>
+	<tbody>
+    	<tr ng-repeat="item in menu.foundItems">
+			<td class="text-center">{{item.name}}</td>
+			<td class="text-center">{{item.short_name}}</td>
+			<td class="text-center">{{item.description}}</td>
+			<td class="text-center"><input type="button"
+                 value="Don't want this one!"
+                ng-click="menu.onRemove({index:$index})"></td>
+		</tr>
+	</tbody>
+</table>

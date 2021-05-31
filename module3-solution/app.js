@@ -1,89 +1,73 @@
-(function () {
-'use strict';
+(function() {
+    'use strict';
 
-angular.module('ShoppingListCheckOff', [])
-.controller('AlreadyBoughtController', AlreadyBoughtController)
-.controller('ToBuyController', ToBuyController)
-.service('ShoppingListCheckOffService', ShoppingListCheckOffService);
+    angular.module('NarrowItDownApp', [])
+        .controller('NarrowItDownController',NarrowItDownController)
+        .service('MenuSearchService',MenuSearchService)
+        .constant('ApiBasePath', 'https://davids-restaurant.herokuapp.com')
+        .directive('foundItems',foundItems);
 
-ToBuyController.$inject = ['ShoppingListCheckOffService'];
-function ToBuyController(ShoppingListCheckOffService) {
-  var showList = this;
+    function foundItems() {
+        var ddo = {
+            restrict: 'E',
+            templateUrl: "foundItems.html",
+            scope: {
+                foundItems: '<',
+                onRemove: '&'
+            },
+            controller: NarrowItDownController,
+            controllerAs: 'menu',
+            bindToController: true
+        };
+        return ddo;
+    }
 
-  showList.items = ShoppingListCheckOffService.getItems();
+    NarrowItDownController.$inject = ['MenuSearchService'];
+    function NarrowItDownController(MenuSearchService) {
+        var menu = this;
+        menu.displayTable = false;
+        menu.error = false;
+        menu.searchItem = '';
+        menu.found = [];
+        
+        menu.getMatchedMenuItems = function(searchItem) {
+            menu.displayTable = false;
+            menu.error = false;
+            menu.found = [];
 
-  showList.removeItem = function (itemIndex) {
-    ShoppingListCheckOffService.removeItem(itemIndex);
-  };
+            if (searchItem) {
+                var promise = MenuSearchService.getMatchedMenuItems(searchItem);
+                promise.then((items) => {
+                    if (items.length > 0){
+                        menu.found = items;
+                        menu.displayTable = true;
+                    }
+                    else {
+                        menu.error = true;
+                    }
+                });
+            }
+            else {
+                menu.error = true;
+            }
+        }
+        menu.removeItem = function(index) {
+            menu.found.splice(index,1);
+        }
+    }
 
-}
+    MenuSearchService.$inject = ['$http','ApiBasePath'];
+    function MenuSearchService($http,ApiBasePath) {
+        var service = this;
 
-AlreadyBoughtController.$inject = ['ShoppingListCheckOffService'];
-function AlreadyBoughtController(ShoppingListCheckOffService) {
-  var itemAdder = this;
-
-  itemAdder.itemName = "";
-  itemAdder.itemQuantity = "";
-
-  itemAdder.addItem = function () {
-    ShoppingListCheckOffService.addItem(itemAdder.itemName, itemAdder.itemQuantity);
-  }
-
-  itemAdder.boughtItems = ShoppingListCheckOffService.getBoughtItems();
-}
-
-function ShoppingListCheckOffService() {
-  var service = this;
-
-  // List of shopping items
-  var items = [ {
-       name: "Milk",
-       quantity: "2"
-     },
-     {
-       name: "Apples",
-       quantity: "10"
-     },
-     {
-       name: "Soda",
-       quantity: "3"
-     },
-     {
-       name: "Carrots",
-       quantity: "24"
-     },
-     {
-       name: "Oranges",
-       quantity: "8"
-     },
-     {
-       name: "Chips",
-       quantity: "5"
-     }
-  ]
-  var boughtItems = [];
-
-  service.addItem = function (itemName, quantity) {
-    var item = {
-      name: itemName,
-      quantity: quantity
-    };
-    items.push(item);
-  };
-
-  service.removeItem = function (itemIndex) {
-    var temp = items.splice(itemIndex, 1)
-    boughtItems.push(temp.pop());
-  };
-
-  service.getItems = function () {
-    return items;
-  };
-
-  service.getBoughtItems = function () {
-    return boughtItems;
-  };
-
-}
-
-})();
+        service.getMatchedMenuItems = function(searchItem) {
+            return $http({
+                method: 'GET',
+                url: (ApiBasePath + '/menu_items.json')
+            }).then((response) => {
+                return response.data['menu_items'].filter(item =>
+                    item.description.toLowerCase().includes(searchItem));
+            });
+        }
+    }
+}())
