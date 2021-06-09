@@ -29,7 +29,7 @@
         menu.error = false;
         menu.searchItem = '';
         menu.found = [];
-        
+
         menu.getMatchedMenuItems = function(searchItem) {
             menu.displayTable = false;
             menu.error = false;
